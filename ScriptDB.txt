@@ -1,0 +1,256 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
+-- -----------------------------------------------------
+-- Schema appche
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema appche
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `appche` DEFAULT CHARACTER SET utf8 ;
+USE `appche` ;
+
+-- -----------------------------------------------------
+-- Table `appche`.`TipoUsuario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `appche`.`TipoUsuario` (
+  `id` INT NOT NULL auto_increment,
+  `Descripcion` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `appche`.`Usuarios`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `appche`.`Usuarios` (
+  `id` INT NOT NULL auto_increment,
+  `idTipoUsuario` INT NOT NULL,
+  `Nombre` VARCHAR(50) NOT NULL,
+  `ApellidoPat` VARCHAR(50) NOT NULL,
+  `ApellidoMat` VARCHAR(50) NULL,
+  `FechaNacimiento` DATETIME NOT NULL,
+  `sexo` CHAR(1) NOT NULL,
+  `Usuario` VARCHAR(50) NOT NULL,
+  `Contrasenia` VARCHAR(50) NOT NULL,
+  `TelefonoParticular` VARCHAR(45) NULL,
+  INDEX `fk_Usuarios_TipoUsuario1_idx` (`idTipoUsuario` ASC),
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_Usuarios_TipoUsuario1`
+    FOREIGN KEY (`idTipoUsuario`)
+    REFERENCES `appche`.`TipoUsuario` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `appche`.`Medico`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `appche`.`Medico` (
+  `Cedula` VARCHAR(50) NOT NULL,
+  `Especialidad` VARCHAR(50) NOT NULL,
+  `idMedico` INT NOT NULL,
+  PRIMARY KEY (`idMedico`),
+  INDEX `fk_Medico_Usuarios_idx` (`idMedico` ASC),
+  CONSTRAINT `fk_Medico_Usuarios`
+    FOREIGN KEY (`idMedico`)
+    REFERENCES `appche`.`Usuarios` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `appche`.`Paciente`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `appche`.`Paciente` (
+  `DescripcionPadecimientos` VARCHAR(500) NOT NULL,
+  `idPaciente` INT NOT NULL,
+  `idCuidador` INT NOT NULL,
+  PRIMARY KEY (`idPaciente`),
+  INDEX `fk_Paciente_Usuarios2_idx` (`idCuidador` ASC),
+  CONSTRAINT `fk_Paciente_Usuarios1`
+    FOREIGN KEY (`idPaciente`)
+    REFERENCES `appche`.`Usuarios` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Paciente_Usuarios2`
+    FOREIGN KEY (`idCuidador`)
+    REFERENCES `appche`.`Usuarios` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `appche`.`Domicilio`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `appche`.`Domicilio` (
+  `id` INT NOT NULL auto_increment,
+  `Estado` VARCHAR(45) NULL,
+  `DelegacionMunicipio` VARCHAR(45) NULL,
+  `Colonia` VARCHAR(45) NULL,
+  `Calle` VARCHAR(45) NULL,
+  `Manzana` VARCHAR(45) NULL,
+  `Lote` VARCHAR(45) NULL,
+  `NumInterior` VARCHAR(45) NULL,
+  `NumExterior` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `appche`.`TiposDispositivos`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `appche`.`TiposDispositivos` (
+  `id` INT NOT NULL auto_increment,
+  `Descripcion` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `appche`.`Dispositivo`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `appche`.`Dispositivo` (
+  `id` INT NOT NULL,
+  `idPaciente` INT NOT NULL,
+  `idTipoDispositivo` INT NOT NULL,
+  PRIMARY KEY (`id`, `idPaciente`),
+  INDEX `fk_Dispositivo_Paciente1_idx` (`idPaciente` ASC),
+  INDEX `fk_Dispositivo_TiposDispositivos1_idx` (`idTipoDispositivo` ASC),
+  CONSTRAINT `fk_Dispositivo_Paciente1`
+    FOREIGN KEY (`idPaciente`)
+    REFERENCES `appche`.`Paciente` (`idPaciente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Dispositivo_TiposDispositivos1`
+    FOREIGN KEY (`idTipoDispositivo`)
+    REFERENCES `appche`.`TiposDispositivos` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `appche`.`TipoMedicion`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `appche`.`TipoMedicion` (
+  `id` INT NOT NULL auto_increment,
+  `Descripcion` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `appche`.`Historial`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `appche`.`Historial` (
+  `FechaRegistro` DATETIME NOT NULL,
+  `idDispositivo` INT NOT NULL,
+  `idTipoMedicion` INT NOT NULL,
+  `Valor` DOUBLE NOT NULL,
+  PRIMARY KEY (`FechaRegistro`, `idDispositivo`, `idTipoMedicion`),
+  INDEX `fk_Historial_TipoMedicion1_idx` (`idTipoMedicion` ASC),
+  CONSTRAINT `fk_Historial_Dispositivo1`
+    FOREIGN KEY (`idDispositivo`)
+    REFERENCES `appche`.`Dispositivo` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Historial_TipoMedicion1`
+    FOREIGN KEY (`idTipoMedicion`)
+    REFERENCES `appche`.`TipoMedicion` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `appche`.`Domicilio_Usuarios`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `appche`.`Domicilio_Usuarios` (
+  `Domicilio_id` INT NOT NULL,
+  `Usuarios_id` INT NOT NULL,
+  PRIMARY KEY (`Domicilio_id`, `Usuarios_id`),
+  INDEX `fk_Domicilio_has_Usuarios_Usuarios1_idx` (`Usuarios_id` ASC),
+  INDEX `fk_Domicilio_has_Usuarios_Domicilio1_idx` (`Domicilio_id` ASC),
+  CONSTRAINT `fk_Domicilio_has_Usuarios_Domicilio1`
+    FOREIGN KEY (`Domicilio_id`)
+    REFERENCES `appche`.`Domicilio` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Domicilio_has_Usuarios_Usuarios1`
+    FOREIGN KEY (`Usuarios_id`)
+    REFERENCES `appche`.`Usuarios` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `appche`.`Medico_Paciente`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `appche`.`Medico_Paciente` (
+  `idMedico` INT NOT NULL,
+  `idPaciente` INT NOT NULL,
+  PRIMARY KEY (`idMedico`, `idPaciente`),
+  INDEX `fk_Medico_has_Paciente_Paciente1_idx` (`idPaciente` ASC),
+  INDEX `fk_Medico_has_Paciente_Medico1_idx` (`idMedico` ASC),
+  CONSTRAINT `fk_Medico_has_Paciente_Medico1`
+    FOREIGN KEY (`idMedico`)
+    REFERENCES `appche`.`Medico` (`idMedico`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Medico_has_Paciente_Paciente1`
+    FOREIGN KEY (`idPaciente`)
+    REFERENCES `appche`.`Paciente` (`idPaciente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `appche`.`Consulta`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `appche`.`Consulta` (
+  `fechaConsulta` DATETIME NOT NULL,
+  `Recordatorios` VARCHAR(500) NOT NULL,
+  `idMedico` INT NOT NULL,
+  `idPaciente` INT NOT NULL,
+  PRIMARY KEY (`fechaConsulta`, `idMedico`, `idPaciente`),
+  INDEX `fk_Consulta_Medico_Paciente1_idx` (`idMedico` ASC, `idPaciente` ASC),
+  CONSTRAINT `fk_Consulta_Medico_Paciente1`
+    FOREIGN KEY (`idMedico` , `idPaciente`)
+    REFERENCES `appche`.`Medico_Paciente` (`idMedico` , `idPaciente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+
+
+use appche;
+insert into tipousuario (Descripcion)values('Cuidador');
+insert into tipousuario (Descripcion)values('Paciente');
+insert into tipousuario (Descripcion)values('Medico');
+insert into tiposdispositivos (Descripcion)values('Prototipo');
+insert into tipomedicion (Descripcion) values('Temperatura');
+insert into tipomedicion (Descripcion) values('Ritmo Cardiaco');
+insert into usuarios(idTipoUsuario,Nombre,ApellidoPat,ApellidoMat,FechaNacimiento,sexo,Usuario,Contrasenia,TelefonoParticular)values(1,'Jesus','Celon','Altamirano','1993-01-16','M','JECA','hola','29783352');
+insert into usuarios(idTipoUsuario,Nombre,ApellidoPat,ApellidoMat,FechaNacimiento,sexo,Usuario,Contrasenia,TelefonoParticular)values(2,'Melisa','Celon','Altamirano','1998-06-28','F','MCA','hola','29783352');
+insert into usuarios(idTipoUsuario,Nombre,ApellidoPat,ApellidoMat,FechaNacimiento,sexo,Usuario,Contrasenia,TelefonoParticular)values(3,'Tanya','Celon','Altamirano','1989-12-11','F','TCA','hola','29783352');
+insert into paciente(DescripcionPadecimientos,idPaciente,idCuidador)values('Nada',2,1);
+insert into medico(Cedula,Especialidad,idMedico)values('123456','Pediatra',3);
+insert into medico_paciente(idMedico,idPaciente)values(3,2);
+insert into dispositivo (id,idPaciente,idTipoDispositivo)values(123456789,2,1);
+insert into historial(FechaRegistro,idDispositivo,idTipoMedicion,Valor)values (now(),123456789,1,35.8);
+insert into consulta(fechaConsulta,Recordatorios,idMedico,idPaciente)values(now(),'Nada',3,2);
